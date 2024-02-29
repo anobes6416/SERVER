@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elearning Activation Email</title>
+    <style type="text/css">
+        /* Base */
+        body{
+            margin: 0;
+            padding: 0;
+            min-width: 100%;
+            font-family: sans-serif;
+            font-size: 16px;
+            line-height: 1.42857143;
+            color: #333;
+            background-color: #fff;
+        }
+        a{
+            text-decoration: none;
+            color:#000;
+        }
+        h1{
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1.25;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        p{
+            margin-top: 0;
+            margin-bottom: 24px;
+        }
+        table td{
+            vertical-align: top;
+        }
+        /* layout */
+        .email-wrapper{
+            min-width: 600px;
+            margin: 0 auto;
+        }
+        .email-header{
+            background-color: orangered;
+            color: #fff;
+            padding: 24px;
+        }
+        .email-body{
+            background-color: #fff;
+            padding: 24px;
+        }
+        .email-footer{
+            padding: 24px;
+            background-color: #fff;
+        }
+        /*buttons*/
+         .button{
+            display: inline-block;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 700;
+            text-decoration: none;
+            text-align: center;
+            background-image: none;
+            border-radius: 4px;
+            color: #fff;
+            background-color: orangered;
+
+            /* additional styling */
+            border: 1px solid transparent;
+            line-height: 1.42857143;
+            border-color: #2f5df2;
+            white-space: nowrap;
+            vertical-align: middle;
+            -ms-touch-action: manipulation;
+            touch-action: manipulation;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-wrapper">
+        <div class="email-header">
+            <h1>Welcome to Our Elearning Platform</h1>
+        </div>
+        <div class="email-body">
+            <p>Hello <%= user.name %>, </p>
+            <p>Thank you for registering with Elearning, To activate your Account, Please use the following activation code:</p>
+            <h2> <%= activationCode %> </h2>
+            <p>Please Enter this code on the activation page within the next 5 minutes.</p>
+            <p>If you didn't register with Elearning account, please ignore this email.</p>
+        </div>
+        <div class="email-footer">
+            <p>If you have any question don't hesitate to contact us at <a href="mailto:sebonaifa777@gmail.com">sebonaifa777@gmail.com</a></p>
+        </div>
+    </div>
+</body>
+</html>
