@@ -1,3 +1,4 @@
+require('dotenv').config();
 import mongoose, {Document, Model, Schema} from "mongoose";
 import bcrypt from "bcryptjs";
 
@@ -15,6 +16,8 @@ export interface IUser extends Document{
     isVerified: boolean;
     courses:Array<{courseId:string}>;
     comparePassword: (password:string) => Promise<boolean>;
+    SignAccessToken:()=>string;
+    SignRefreshToken:()=>string;
 }
 
 const useSchema: Schema<IUser> = new mongoose.Schema({

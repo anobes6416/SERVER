@@ -19,6 +19,7 @@ export const registrationUser = CatchAsyncError(async (req: Request, res: Respon
     try {
         //get data from the request body
         const { name, email, password } = req.body;
+
         const isEmailExist = await userModel.findOne({ email });
         if (isEmailExist) {
             return next(new ErrorHandler("This Email Is Already Exists", 400));
@@ -35,8 +36,9 @@ export const registrationUser = CatchAsyncError(async (req: Request, res: Respon
         const activationCode = activationToken.activationCode;
         
         const data = {user:{name:user.name}, activationCode};
-        const html = await ejs.renderFile(path.join(__dirname, "../mails/activation_mail.ejs"))
+        const html = await ejs.renderFile(path.join(__dirname, "../mails/activation_mail.ejs"), data)
 
+        
         try {
             await sendMail({
                 email: user.email,
