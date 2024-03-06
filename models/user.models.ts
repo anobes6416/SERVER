@@ -1,6 +1,7 @@
 require('dotenv').config();
 import mongoose, {Document, Model, Schema} from "mongoose";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const emailRegexPattern: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;   
 
@@ -16,11 +17,12 @@ export interface IUser extends Document{
     isVerified: boolean;
     courses:Array<{courseId:string}>;
     comparePassword: (password:string) => Promise<boolean>;
-    SignAccessToken:()=>string;
-    SignRefreshToken:()=>string;
+    SignAccessToken:()=> string;
+    SignRefreshToken:()=> string;
 }
 
-const useSchema: Schema<IUser> = new mongoose.Schema({
+const userSchema: Schema<IUser> = new mongoose.Schema(
+    {
     name:{
         type:String,
         required: [true, "please enter your name"]
@@ -43,8 +45,8 @@ const useSchema: Schema<IUser> = new mongoose.Schema({
         select: false,
     },
     avatar:{
-        public_id: {type: String},
-        url: {type: String}
+        public_id: String,
+        url: String
     },
     role:{
         type: String,  
@@ -59,22 +61,40 @@ const useSchema: Schema<IUser> = new mongoose.Schema({
             courseId:String,
         }
     ],
-    },{timestamps:true});
+    },
+    {timestamps:true}
+    );
 
     // hashing password before saving
-    useSchema.pre<IUser>('save', async function (next) {
+    userSchema.pre<IUser>('save', async function (next) {
       if (!this.isModified('password')) {
-          return next();
+         next();
       }
       this.password = await bcrypt.hash(this.password, 10);
       next()
-  })
+  });
+
+//sign access token
+userSchema.methods.SignAccessToken = function(){
+    return jwt.sign({id: this._id,}, process.env.ACCESS_TOKEN || '',{
+        expiresIn:"5m",
+    });
+};
+
+//sign refresh token
+userSchema.methods.SignRefreshToken = function(){
+    return jwt.sign({id: this._id,}, process.env.REFRESH_TOKEN || '',{
+        expiresIn:"3d",
+    });
+}
 
   //compare password
-useSchema.methods.comparePassword=async function(enteredPassword: string):Promise<boolean>{
+userSchema.methods.comparePassword=async function(
+    enteredPassword: string
+    ):Promise<boolean>{
     return await bcrypt.compare(enteredPassword, this.password);
 };
 
-const userModel:Model<IUser> = mongoose.model("User", useSchema);
+const userModel:Model<IUser> = mongoose.model("User", userSchema);
 
 export default userModel;    
