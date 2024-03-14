@@ -2,15 +2,15 @@ import { NextFunction, Request, Response } from "express";
 import { CatchAsyncError } from "../middleware/catchAsyncError";
 import ErrorHandler from "../utils/ErrorHandler";
 import cloudinary from "cloudinary";
-import { createCourse } from "../services/course.services";
+import { createCourse, getAllCoursesService } from "../services/course.services";
 import CourseModel from "../models/course.model";
 import { redis } from "../utils/redis";
 import mongoose from "mongoose";
 import path from "path";
 import ejs from "ejs";
 import sendMail from "../utils/sendMail";
-
-
+import NotificationModel from "../models/notification.Model";
+import { getAllUsersService } from "../services/user.services";
 
 // upload course
 export const uploadCourse = CatchAsyncError(
@@ -112,7 +112,7 @@ export const getSingleCourse = CatchAsyncError(
 );
 
 // get all course without purchasing
-export const getAllCourse=CatchAsyncError(
+export const getAllCourses=CatchAsyncError(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const isCacheExist=await redis.get("all courses");
@@ -210,6 +210,12 @@ export const addQuestion=CatchAsyncError(
     // add this question to our course content
         courseContent.questions.push(newQuestion);
         
+        await NotificationModel.create({
+            user: req.user?._id,
+            title: "New Question Received",
+            message:`you have a new question in ${courseContent.title}`,
+        })
+
         //save the updated course
         await course?.save();
 
@@ -273,7 +279,11 @@ interface IAddAnswerData {
         if (req.user?._id===question.user._id) {
 
             //create a notification
-
+            await NotificationModel.create({
+                user: req.user?._id,
+                title: "New Question Reply Received",
+                message:`you have a new question reply in ${courseContent.title}`,
+            })
         } else {
             const data={
                 name: question.user.name,
@@ -411,3 +421,14 @@ export const addReplyToReview=CatchAsyncError(
             return next(new ErrorHandler(error.message, 500));
         }
     });
+
+    //get all courses ---- only for admin
+export const getAllUsers=CatchAsyncError(
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            getAllCoursesService(res);
+        } catch (error: any) {
+            return next(new ErrorHandler(error.message, 400))
+        }
+    }
+);

@@ -10,8 +10,10 @@ import sendMail from "../utils/sendMail";
 import { accessTokenOptions, refreshTokenOptions, sendToken } from "../utils/jwt";
 import { redis } from "../utils/redis";
 import exp from "constants";
-import { getUserById } from "../services/user.services";
+import { getAllUsersService, getUserById, updateUserRoleService } from "../services/user.services";
 import cloudinary from "cloudinary";
+import CourseModel from "../models/course.model";
+
 interface IRegistrationBody {
     name: string;
     email: string;
@@ -380,8 +382,89 @@ export const updateProfilePicture = CatchAsyncError(async (req: Request, res: Re
         }
         await user?.save();
         
-        await redis.set(userId, JSON.stringify(user))
+        await redis.set(userId, JSON.stringify(user));
+
+        res.status(200).json({
+            success: true,
+            user,
+        })
+
     } catch (error:any) {
         return next(new ErrorHandler(error.message, 400))   
     }
 }) 
+
+//get all users ---- only for admin
+export const getAllUsers=CatchAsyncError(
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            getAllUsersService(res);
+        } catch (error: any) {
+            return next(new ErrorHandler(error.message, 400))
+        }
+    }
+);
+
+//update user role ---- only for admin 
+export const updateUserRole=CatchAsyncError(
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { id, role }=req.body;
+            updateUserRoleService(res,id,role);
+        } catch (error: any) {
+            return next(new ErrorHandler(error.message, 400))
+        }
+    }
+);
+
+//Delete user --- only for admin
+export const deleteUser=CatchAsyncError(
+    async (req: Request, res: Response, next: NextFunction) => { 
+        try {
+            const { id }=req.params;
+
+            const user=await userModel.findById(id);
+
+            if (!user) {
+                return next(new ErrorHandler("User not found", 400));
+            }
+
+            await user.deleteOne({ id });
+
+            await redis.del(id);
+
+            res.status(201).json({
+                success: true,
+                message: "user deleted successfully"
+            });
+
+        } catch (error: any) {
+            return next(new ErrorHandler(error.message, 400))      
+        }
+    });
+
+    //Delete Course --- only for admin
+export const deleteCourse=CatchAsyncError(
+    async (req: Request, res: Response, next: NextFunction) => { 
+        try {
+            const { id }=req.params;
+
+            const course=await CourseModel.findById(id);
+
+            if (!course) {
+                return next(new ErrorHandler("course not found", 400));
+            }
+
+            await course.deleteOne({ id });
+
+            await redis.del(id);
+
+            res.status(201).json({
+                success: true,
+                message: "Course deleted successfully"
+            });
+
+        } catch (error: any) {
+            return next(new ErrorHandler(error.message, 400))      
+        }
+    });

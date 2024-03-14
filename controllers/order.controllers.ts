@@ -8,7 +8,7 @@ import path from "path";
 import ejs from "ejs";
 import sendMail from "../utils/sendMail";
 import NotificationModel from "../models/notification.Model";
-import { newOrder } from "../services/order.services";
+import { getAllOrdersService, newOrder } from "../services/order.services";
 import { privateDecrypt } from "crypto";
 
 // create order
@@ -70,9 +70,24 @@ export const createOrder=CatchAsyncError(async (req: Request, res: Response, nex
             message:`you have a new order from ${course?.name}`,
         })
 
+        course.purchased? course.purchased+=1 : course.purchased;
+
+        await course.save();
+
         newOrder(data, res, next);
 
     } catch (error: any) {
         return next(new ErrorHandler(error.message, 500));
     }
 });
+
+//get all Orders ---- only for 
+export const getAllOrders=CatchAsyncError(
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            getAllOrdersService(res);
+        } catch (error: any) {
+            return next(new ErrorHandler(error.message, 400))
+        }
+    }
+);
