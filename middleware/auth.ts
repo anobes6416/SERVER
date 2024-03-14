@@ -21,7 +21,7 @@ export const isAuthenticated = CatchAsyncError(async(req:Request, res:Response, 
             const user = await redis.get(decoded.id);
 
             if(!user){
-               return next( new ErrorHandler ('the user that the token belongs to no longer exists', 401));
+               return next( new ErrorHandler ('the user that the token belongs to no longer exists', 400));
            }
 
               req.user = JSON.parse(user!);

@@ -16,8 +16,10 @@ import { getAllUsersService } from "../services/user.services";
 export const uploadCourse = CatchAsyncError(
     async (req: Request, res: Response, next: NextFunction) =>{
     try {
-        const data = req.body;
-        const thumbnail = data.thumbnail;
+        const data=req.body;
+        
+        const thumbnail=data.thumbnail;
+        
         if(thumbnail){
             const myCloud = await cloudinary.v2.uploader.upload(thumbnail, {
             folder:"courses"
@@ -97,7 +99,7 @@ export const getSingleCourse = CatchAsyncError(
                     "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
                 );
                 
-                await redis.set(courseId, JSON.stringify(course));
+                await redis.set(courseId, JSON.stringify(course), "EX", 604800);
 
                 res.status(200).json({
                     success: true,
